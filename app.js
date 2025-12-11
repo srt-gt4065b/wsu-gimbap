@@ -93,18 +93,41 @@ const menuData = {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('으능정이 우송 앱이 시작되었습니다.');
     
+    // Firebase 인증 상태 확인
+    checkAuthState();
+    
     // 스플래시 화면 표시
     setTimeout(() => {
         hideSplash();
-        showWelcome();
+        
+        // localStorage에서 사용자 정보 확인
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+            console.log('저장된 사용자 정보:', currentUser);
+            
+            // menu.html인 경우 메뉴 화면으로, 아니면 welcome으로
+            if (window.location.pathname.includes('menu.html')) {
+                // 메뉴 페이지에서는 그대로 유지
+            } else {
+                goToMenu();
+            }
+        } else {
+            showWelcome();
+        }
     }, 2000);
     
     // 이벤트 리스너 설정
     setupEventListeners();
-    
-    // 데모용 사용자 설정
-    setupDemoUser();
 });
+
+// Firebase 인증 상태 확인
+function checkAuthState() {
+    // Firebase auth 상태 변경 리스너는 firebase-config.js에 이미 설정되어 있음
+    if (typeof firebaseUtils !== 'undefined' && firebaseUtils.getCurrentUserId()) {
+        console.log('Firebase 사용자 로그인됨:', firebaseUtils.getCurrentUserId());
+    }
+}
 
 // 스플래시 화면 숨기기
 function hideSplash() {
@@ -149,8 +172,8 @@ function hideAllScreens() {
     });
 }
 
-// 로그인 처리 (데모용)
-function login() {
+// 로그인 처리 (Firebase 연동)
+async function login() {
     const email = document.getElementById('email')?.value;
     const password = document.getElementById('password')?.value;
     
@@ -159,52 +182,110 @@ function login() {
         return;
     }
     
-    // 데모용 로그인 성공 처리
-    currentUser = {
-        id: 'demo-user',
-        name: '김우송',
-        email: email,
-        department: '컴퓨터정보학과',
-        studentId: '202012345',
-        membership: {
-            tier: 'GOLD',
-            discountRate: 0.15,
-            points: 1250
+    try {
+        // Firebase 로그인
+        const result = await firebaseAuth.signIn(email, password);
+        
+        if (result.success) {
+            // 사용자 데이터 가져오기
+            const userData = await firebaseDB.getUserData(result.user.uid);
+            
+            currentUser = {
+                id: result.user.uid,
+                email: result.user.email,
+                ...userData
+            };
+            
+            // localStorage에 저장
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            alert('로그인되었습니다!');
+            goToMenu();
+        } else {
+            alert('로그인 실패: ' + result.error);
         }
-    };
-    
-    alert('로그인되었습니다!');
-    goToMenu();
+    } catch (error) {
+        console.error('로그인 오류:', error);
+        alert('로그인 중 오류가 발생했습니다.');
+    }
 }
 
-// 회원가입 처리 (데모용)
-function signup() {
+// 회원가입 처리 (Firebase 연동)
+async function signup() {
+    const email = document.getElementById('signup-email')?.value;
+    const password = document.getElementById('signup-password')?.value;
+    const passwordConfirm = document.getElementById('signup-password-confirm')?.value;
     const name = document.getElementById('name')?.value;
     const phone = document.getElementById('phone')?.value;
     const department = document.getElementById('department')?.value;
     const studentId = document.getElementById('student-id')?.value;
+    const nationality = document.getElementById('nationality')?.value;
+    const allergy = document.getElementById('allergy')?.value;
     const agreeTerms = document.getElementById('agree-terms')?.checked;
     
-    if (!name || !phone || !department || !studentId || !agreeTerms) {
+    // 학년 선택 확인
+    const selectedGrade = document.querySelector('.grade-btn.active');
+    const grade = selectedGrade ? selectedGrade.dataset.grade : null;
+    
+    // 유효성 검사
+    if (!email || !password || !passwordConfirm || !name || !phone || !department || !studentId || !agreeTerms || !grade) {
         alert('필수 정보를 모두 입력하고 약관에 동의해주세요.');
         return;
     }
     
-    // 데모용 회원가입 성공 처리
-    currentUser = {
-        id: 'demo-user',
-        name: name,
-        department: department,
-        studentId: studentId,
-        membership: {
-            tier: 'BRONZE',
-            discountRate: 0.05,
-            points: 0
-        }
-    };
+    if (password !== passwordConfirm) {
+        alert('비밀번호가 일치하지 않습니다.');
+        return;
+    }
     
-    alert('멤버십 가입이 완료되었습니다! 첫 주문 20% 할인 쿠폰이 발급되었어요.');
-    goToMenu();
+    if (password.length < 6) {
+        alert('비밀번호는 6자 이상이어야 합니다.');
+        return;
+    }
+    
+    try {
+        // Firebase 회원가입
+        const userData = {
+            name: name,
+            phone: phone,
+            department: department,
+            studentId: studentId,
+            grade: grade,
+            nationality: nationality || 'KOR',
+            languagePref: 'ko',
+            allergyInfo: allergy || ''
+        };
+        
+        console.log('회원가입 시도:', { email, userData });
+        
+        const result = await firebaseAuth.signUp(email, password, userData);
+        
+        if (result.success) {
+            currentUser = {
+                id: result.user.uid,
+                email: email,
+                ...userData,
+                membership: {
+                    tier: 'BRONZE',
+                    discountRate: 0.05,
+                    points: 0
+                }
+            };
+            
+            // localStorage에 저장
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            console.log('회원가입 성공:', currentUser);
+            alert('멤버십 가입이 완료되었습니다! 첫 주문 20% 할인 쿠폰이 발급되었어요.');
+            goToMenu();
+        } else {
+            console.error('회원가입 실패:', result.error);
+            alert('회원가입 실패: ' + result.error);
+        }
+    } catch (error) {
+        console.error('회원가입 오류:', error);
+        alert('회원가입 중 오류가 발생했습니다: ' + error.message);
+    }
 }
 
 // 메뉴 화면으로 이동
@@ -489,8 +570,8 @@ function useCoupon(type) {
     }
 }
 
-// 결제 처리
-function processPayment() {
+// 결제 처리 (Firebase 연동)
+async function processPayment() {
     const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value;
     
     if (!paymentMethod) {
@@ -498,28 +579,76 @@ function processPayment() {
         return;
     }
     
-    // 데모용 결제 처리
-    showToast('결제를 처리하고 있습니다...');
+    if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        showLogin();
+        return;
+    }
     
-    setTimeout(() => {
-        // 주문 완료 처리
-        const orderId = Math.floor(Math.random() * 1000) + 1;
-        const order = {
-            id: orderId,
-            items: [...cart],
-            type: currentOrderType,
-            status: 'preparing',
-            createdAt: new Date(),
-            total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    try {
+        showToast('결제를 처리하고 있습니다...');
+        
+        // 주문 데이터 준비
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const discountRate = currentUser?.membership?.discountRate || 0.05;
+        const discount = Math.floor(subtotal * discountRate);
+        const total = subtotal - discount;
+        
+        const orderData = {
+            userId: currentUser.id,
+            userName: currentUser.name,
+            userEmail: currentUser.email,
+            items: cart.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity
+            })),
+            orderType: currentOrderType,
+            paymentMethod: paymentMethod,
+            subtotal: subtotal,
+            discount: discount,
+            total: total,
+            status: 'pending',
+            createdAt: new Date().toISOString()
         };
         
-        orderHistory.push(order);
-        cart = []; // 장바구니 비우기
-        updateCartUI();
+        console.log('주문 데이터:', orderData);
         
-        // 주문 상태 화면으로 이동
-        showOrderStatus(orderId);
-    }, 2000);
+        // Firebase에 주문 저장
+        const result = await firebaseDB.saveOrder(orderData);
+        
+        if (result.success) {
+            console.log('주문 저장 성공:', result.orderId);
+            
+            // 주문 내역에 추가
+            const order = {
+                id: result.orderId,
+                ...orderData,
+                status: 'preparing'
+            };
+            
+            orderHistory.push(order);
+            
+            // 장바구니 비우기
+            cart = [];
+            updateCartUI();
+            
+            showToast('결제가 완료되었습니다!');
+            
+            // 주문 상태 화면으로 이동
+            setTimeout(() => {
+                showOrderStatus(result.orderId);
+            }, 1000);
+        } else {
+            console.error('주문 저장 실패:', result.error);
+            alert('주문 처리 중 오류가 발생했습니다: ' + result.error);
+        }
+    } catch (error) {
+        console.error('결제 처리 오류:', error);
+        alert('결제 처리 중 오류가 발생했습니다: ' + error.message);
+    }
+}
 }
 
 // 주문 상태 화면 표시
@@ -692,9 +821,9 @@ function setupEventListeners() {
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('grade-btn')) {
             document.querySelectorAll('.grade-btn').forEach(btn => {
-                btn.classList.remove('selected');
+                btn.classList.remove('active');
             });
-            e.target.classList.add('selected');
+            e.target.classList.add('active');
         }
         
         // 언어 선택 버튼
@@ -730,25 +859,6 @@ function setupEventListeners() {
     });
 }
 
-// 데모용 사용자 설정
-function setupDemoUser() {
-    // 데모용으로 사용자 로그인 상태 설정
-    if (!currentUser) {
-        currentUser = {
-            id: 'demo-user',
-            name: '김우송',
-            email: 'student@woosong.ac.kr',
-            department: '컴퓨터정보학과',
-            studentId: '202012345',
-            membership: {
-                tier: 'GOLD',
-                discountRate: 0.15,
-                points: 1250
-            }
-        };
-    }
-}
-
 // 페이지별 초기화 함수들
 if (typeof window !== 'undefined') {
     // 현재 페이지에 따른 초기화
@@ -759,14 +869,25 @@ if (typeof window !== 'undefined') {
             // 메뉴 페이지 초기화
             document.addEventListener('DOMContentLoaded', function() {
                 updateCartUI();
-                setupDemoUser();
+                
+                // localStorage에서 사용자 정보 불러오기
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    currentUser = JSON.parse(savedUser);
+                    console.log('메뉴 페이지 - 사용자:', currentUser);
+                }
             });
             break;
             
         case 'order.html':
             // 주문 페이지 초기화
             document.addEventListener('DOMContentLoaded', function() {
-                setupDemoUser();
+                // localStorage에서 사용자 정보 불러오기
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    currentUser = JSON.parse(savedUser);
+                    console.log('주문 페이지 - 사용자:', currentUser);
+                }
             });
             break;
             
