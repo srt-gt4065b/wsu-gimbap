@@ -3,13 +3,14 @@
 
 // Firebase 설정 객체 (사용자가 Firebase Console에서 가져와서 채워넣을 부분)
 const firebaseConfig = {
-    // 여기에 Firebase 설정을 추가하세요
-    // apiKey: "your-api-key",
-    // authDomain: "your-project.firebaseapp.com",
-    // projectId: "your-project-id",
-    // storageBucket: "your-project.appspot.com",
-    // messagingSenderId: "123456789",
-    // appId: "your-app-id"
+   apiKey: "AIzaSyB9Q9RTZp5M8bnt7GXqdrXnUORNM0fcITw",
+  authDomain: "wsu-gimbap.firebaseapp.com",
+  databaseURL: "https://wsu-gimbap-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "wsu-gimbap",
+  storageBucket: "wsu-gimbap.firebasestorage.app",
+  messagingSenderId: "641588762412",
+  appId: "1:641588762412:web:a4743a11b8a64183a9fe89",
+  measurementId: "G-9CW8JLN610"
 };
 
 // Firebase 초기화 (실제 설정이 있을 때만 초기화)
