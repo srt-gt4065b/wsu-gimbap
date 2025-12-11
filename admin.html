@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 - 으능정이 우송</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container admin-container">
+        <!-- Admin Header -->
+        <div class="admin-header">
+            <div class="admin-logo">
+                <h1>🍱 으능정이 관리자</h1>
+            </div>
+            <div class="admin-controls">
+                <button class="refresh-btn" onclick="refreshData()">
+                    <i class="fas fa-sync"></i>
+                </button>
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">5</span>
+                </button>
+                <button class="profile-btn">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div class="admin-dashboard">
+            <!-- Today's Stats -->
+            <div class="stats-section">
+                <h2>📊 오늘의 현황</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <h3>47</h3>
+                            <span>총 주문수</span>
+                        </div>
+                        <div class="stat-trend up">+12%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3>₩235K</h3>
+                            <span>총 매출</span>
+                        </div>
+                        <div class="stat-trend up">+8%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏰</div>
+                        <div class="stat-info">
+                            <h3>3</h3>
+                            <span>대기 주문</span>
+                        </div>
+                        <div class="stat-trend">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <h3>95%</h3>
+                            <span>완료율</span>
+                        </div>
+                        <div class="stat-trend up">+3%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Orders -->
+            <div class="orders-section">
+                <div class="section-header">
+                    <h2>⏰ 실시간 주문 관리</h2>
+                    <div class="auto-refresh">
+                        <i class="fas fa-sync fa-spin"></i>
+                        <span>자동 새로고침</span>
+                    </div>
+                </div>
+
+                <div class="orders-list">
+                    <div class="order-card pending">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <span class="order-id">#47</span>
+                                <span class="customer-name">김우송님</span>
+                                <span class="order-time">13:15</span>
+                            </div>
+                            <div class="order-type instant">즉시픽업</div>
+                        </div>
+                        <div class="order-items">
+                            <span>참치김밥 2개, 불고기김밥 1개</span>
+                        </div>
+                        <div class="order-details">
+                            <span class="order-amount">₩7,000</span>
+                            <span class="pickup-time">13:30 픽업예정</span>
+                        </div>
+                        <div class="order-actions">
+                            <button class="btn-complete" onclick="updateOrderStatus('47', 'preparing')">
+                                <i class="fas fa-play"></i>
+                                조리 시작
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="order-card preparing">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <span class="order-id">#46</span>
+                                <span class="customer-name">박민지님</span>
+                                <span class="order-time">13:10</span>
+                            </div>
+                            <div class="order-type reserved">예약주문</div>
+                        </div>
+                        <div class="order-items">
+                            <span>치즈김밥 1개, 콜라 1개</span>
+                        </div>
+                        <div class="order-details">
+                            <span class="order-amount">₩3,500</span>
+                            <span class="pickup-time">14:00 픽업예정</span>
+                        </div>
+                        <div class="order-actions">
+                            <button class="btn-ready" onclick="updateOrderStatus('46', 'ready')">
+                                <i class="fas fa-check"></i>
+                                조리 완료
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="order-card ready">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <span class="order-id">#45</span>
+                                <span class="customer-name">이철수님</span>
+                                <span class="order-time">13:05</span>
+                            </div>
+                            <div class="order-type delivery">배달</div>
+                        </div>
+                        <div class="order-items">
+                            <span>소고기김밥 2개</span>
+                        </div>
+                        <div class="order-details">
+                            <span class="order-amount">₩9,000</span>
+                            <span class="delivery-info">공학관 301호</span>
+                        </div>
+                        <div class="order-actions">
+                            <button class="btn-notify" onclick="sendNotification('45')">
+                                <i class="fas fa-bell"></i>
+                                알림 발송
+                            </button>
+                            <button class="btn-complete" onclick="updateOrderStatus('45', 'completed')">
+                                <i class="fas fa-check-double"></i>
+                                픽업 완료
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions-section">
+                <h2>🛠 빠른 관리</h2>
+                <div class="quick-actions-grid">
+                    <button class="quick-action-card" onclick="showMenuManagement()">
+                        <div class="action-icon">🍱</div>
+                        <div class="action-info">
+                            <h4>메뉴 관리</h4>
+                            <span>메뉴 추가/수정/삭제</span>
+                        </div>
+                    </button>
+                    <button class="quick-action-card" onclick="showInventory()">
+                        <div class="action-icon">📦</div>
+                        <div class="action-info">
+                            <h4>재고 관리</h4>
+                            <span>품절 처리/재고 확인</span>
+                        </div>
+                    </button>
+                    <button class="quick-action-card" onclick="showEventManagement()">
+                        <div class="action-icon">🎪</div>
+                        <div class="action-info">
+                            <h4>이벤트 관리</h4>
+                            <span>할인/쿠폰 생성</span>
+                        </div>
+                    </button>
+                    <button class="quick-action-card" onclick="showCustomerManagement()">
+                        <div class="action-icon">👥</div>
+                        <div class="action-info">
+                            <h4>고객 관리</h4>
+                            <span>멤버십/고객 분석</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Menu Management Modal -->
+            <div class="modal hidden" id="menu-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>🍱 메뉴 관리</h3>
+                        <button class="close-modal" onclick="hideModal('menu-modal')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="menu-list-admin">
+                            <div class="menu-item-admin">
+                                <div class="menu-info-admin">
+                                    <h4>참치김밥</h4>
+                                    <span class="price">₩3,500</span>
+                                </div>
+                                <div class="menu-controls">
+                                    <button class="btn-edit">수정</button>
+                                    <button class="btn-toggle available">판매중</button>
+                                </div>
+                            </div>
+                            <div class="menu-item-admin">
+                                <div class="menu-info-admin">
+                                    <h4>불고기김밥</h4>
+                                    <span class="price">₩4,000</span>
+                                </div>
+                                <div class="menu-controls">
+                                    <button class="btn-edit">수정</button>
+                                    <button class="btn-toggle unavailable">품절</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-primary full-width">
+                            <i class="fas fa-plus"></i>
+                            새 메뉴 추가
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Management Modal -->
+            <div class="modal hidden" id="event-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>🎪 이벤트 관리</h3>
+                        <button class="close-modal" onclick="hideModal('event-modal')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="event-form">
+                            <div class="form-group">
+                                <label>이벤트 제목</label>
+                                <input type="text" placeholder="예: 중간고사 응원 이벤트">
+                            </div>
+                            <div class="form-group">
+                                <label>이벤트 유형</label>
+                                <select>
+                                    <option>할인 이벤트</option>
+                                    <option>쿠폰 발행</option>
+                                    <option>특별 서비스</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>할인율</label>
+                                <input type="number" placeholder="30" min="0" max="100">
+                                <span>%</span>
+                            </div>
+                            <div class="form-group">
+                                <label>기간 설정</label>
+                                <div class="date-range">
+                                    <input type="date">
+                                    <span>~</span>
+                                    <input type="date">
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-primary full-width">
+                            <i class="fas fa-rocket"></i>
+                            이벤트 생성
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div class="analytics-section">
+                <h2>📈 분석 및 통계</h2>
+                <div class="analytics-grid">
+                    <div class="chart-card">
+                        <h4>인기 메뉴</h4>
+                        <div class="chart-placeholder">
+                            <div class="chart-bar" style="height: 80%">
+                                <span>참치김밥</span>
+                                <span>47개</span>
+                            </div>
+                            <div class="chart-bar" style="height: 65%">
+                                <span>불고기김밥</span>
+                                <span>35개</span>
+                            </div>
+                            <div class="chart-bar" style="height: 50%">
+                                <span>치즈김밥</span>
+                                <span>28개</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h4>시간대별 주문</h4>
+                        <div class="time-chart">
+                            <div class="time-slot">
+                                <span>11:00-13:00</span>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 85%"></div>
+                                </div>
+                                <span>85%</span>
+                            </div>
+                            <div class="time-slot">
+                                <span>13:00-15:00</span>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 70%"></div>
+                                </div>
+                                <span>70%</span>
+                            </div>
+                            <div class="time-slot">
+                                <span>17:00-19:00</span>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: 60%"></div>
+                                </div>
+                                <span>60%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Support Fund -->
+            <div class="support-fund-section">
+                <h2>💚 학생 지원 기금 현황</h2>
+                <div class="fund-card">
+                    <div class="fund-stats">
+                        <div class="fund-stat">
+                            <h3>₩72,000</h3>
+                            <span>이번 달 적립</span>
+                        </div>
+                        <div class="fund-stat">
+                            <h3>₩864,000</h3>
+                            <span>올해 총 적립</span>
+                        </div>
+                        <div class="fund-stat">
+                            <h3>24명</h3>
+                            <span>지원 학생 수</span>
+                        </div>
+                    </div>
+                    <div class="fund-progress">
+                        <div class="progress-info">
+                            <span>이번 달 목표</span>
+                            <span>₩72,000 / ₩100,000</span>
+                        </div>
+                        <div class="progress-bar-large">
+                            <div class="progress" style="width: 72%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

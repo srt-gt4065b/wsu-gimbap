@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문하기 - 으능정이 우송</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Order Type Selection -->
+        <div id="order-type-screen" class="screen">
+            <div class="screen-header">
+                <button class="back-btn" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>주문 방식 선택</h2>
+            </div>
+
+            <div class="order-type-content">
+                <h3>어떻게 주문하시겠어요?</h3>
+                
+                <div class="order-types">
+                    <div class="order-type-card" onclick="selectOrderType('instant')">
+                        <div class="order-type-icon">⚡</div>
+                        <h4>즉시 픽업</h4>
+                        <p>지금 바로 주문하고 15분 후 픽업</p>
+                        <div class="order-type-info">
+                            <span>🏃‍♂️ 매장에서 수령</span>
+                            <span>⏰ 평균 15분 소요</span>
+                        </div>
+                        <div class="order-type-badge">추천</div>
+                    </div>
+
+                    <div class="order-type-card" onclick="selectOrderType('reserved')">
+                        <div class="order-type-icon">📅</div>
+                        <h4>예약 주문</h4>
+                        <p>원하는 시간에 맞춰 미리 주문</p>
+                        <div class="order-type-info">
+                            <span>🎯 시간 선택 가능</span>
+                            <span>⏰ 오늘 11:30~19:00</span>
+                        </div>
+                    </div>
+
+                    <div class="order-type-card delivery" onclick="selectOrderType('delivery')">
+                        <div class="order-type-icon">🚗</div>
+                        <h4>배달 주문</h4>
+                        <p>시험기간 한정 강의실 배달</p>
+                        <div class="order-type-info">
+                            <span>🏫 강의실까지 배달</span>
+                            <span>📍 배달비 무료</span>
+                        </div>
+                        <div class="order-type-badge special">시험기간</div>
+                    </div>
+                </div>
+
+                <div class="order-time-optimizer">
+                    <h4>🎯 픽업시간 최적화 추천</h4>
+                    <div class="time-suggestions">
+                        <div class="time-suggestion recommended">
+                            <span class="time">13:45</span>
+                            <span class="status">여유</span>
+                            <i class="fas fa-thumbs-up"></i>
+                        </div>
+                        <div class="time-suggestion">
+                            <span class="time">14:00</span>
+                            <span class="status">보통</span>
+                        </div>
+                        <div class="time-suggestion busy">
+                            <span class="time">14:15</span>
+                            <span class="status">혼잡</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Screen -->
+        <div id="cart-screen" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-btn" onclick="hideCart()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>장바구니</h2>
+                <button class="clear-btn" onclick="clearCart()">전체삭제</button>
+            </div>
+
+            <div class="cart-content">
+                <div class="cart-items" id="cart-items">
+                    <!-- 장바구니 아이템들이 동적으로 추가됩니다 -->
+                </div>
+
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>상품 금액</span>
+                        <span id="subtotal">₩0</span>
+                    </div>
+                    <div class="summary-row discount">
+                        <span>멤버십 할인 (15%)</span>
+                        <span id="discount">-₩0</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>총 결제 금액</span>
+                        <span id="total">₩0</span>
+                    </div>
+                </div>
+
+                <button class="btn-primary full-width" onclick="proceedToPayment()" id="checkout-btn" disabled>
+                    주문하기
+                </button>
+            </div>
+        </div>
+
+        <!-- Payment Screen -->
+        <div id="payment-screen" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-btn" onclick="showCart()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>결제하기</h2>
+            </div>
+
+            <div class="payment-content">
+                <!-- Order Summary -->
+                <div class="payment-section">
+                    <h3>주문 정보</h3>
+                    <div class="order-summary">
+                        <div class="order-type-info">
+                            <span class="order-type" id="selected-order-type">즉시 픽업</span>
+                            <span class="pickup-time" id="selected-pickup-time">약 15분 후</span>
+                        </div>
+                        <div class="order-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>으능정이꼬마김밥 우송대점</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Address (if delivery selected) -->
+                <div class="payment-section delivery-section hidden">
+                    <h3>배달 정보</h3>
+                    <div class="delivery-form">
+                        <div class="input-group">
+                            <i class="fas fa-building"></i>
+                            <select id="building">
+                                <option value="">건물 선택</option>
+                                <option value="main">본관</option>
+                                <option value="engineering">공학관</option>
+                                <option value="business">경영관</option>
+                                <option value="liberal">교양관</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-door-open"></i>
+                            <input type="text" placeholder="강의실 번호 (예: 301호)" id="room">
+                        </div>
+                        <div class="input-group">
+                            <i class="fas fa-comment"></i>
+                            <input type="text" placeholder="상세 위치 (선택사항)" id="detail-location">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Special Requests -->
+                <div class="payment-section">
+                    <h3>특별 요청사항</h3>
+                    <textarea placeholder="요청사항을 입력해주세요 (예: 매워하지 않게 해주세요)" id="special-requests"></textarea>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="payment-section">
+                    <h3>결제 수단</h3>
+                    <div class="payment-methods">
+                        <label class="payment-method">
+                            <input type="radio" name="payment" value="card" checked>
+                            <div class="method-info">
+                                <i class="fas fa-credit-card"></i>
+                                <span>신용/체크카드</span>
+                            </div>
+                        </label>
+                        <label class="payment-method">
+                            <input type="radio" name="payment" value="transfer">
+                            <div class="method-info">
+                                <i class="fas fa-university"></i>
+                                <span>무통장입금</span>
+                            </div>
+                        </label>
+                        <label class="payment-method">
+                            <input type="radio" name="payment" value="kakaopay">
+                            <div class="method-info">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>카카오페이</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Coupons & Discounts -->
+                <div class="payment-section">
+                    <h3>쿠폰 & 할인</h3>
+                    <div class="coupon-section">
+                        <div class="coupon-input">
+                            <input type="text" placeholder="쿠폰 코드 입력" id="coupon-code">
+                            <button class="coupon-apply-btn" onclick="applyCoupon()">적용</button>
+                        </div>
+                        <div class="available-coupons">
+                            <div class="coupon-item">
+                                <div class="coupon-info">
+                                    <span class="coupon-name">생일 축하 쿠폰</span>
+                                    <span class="coupon-discount">30% 할인</span>
+                                </div>
+                                <button class="use-coupon-btn" onclick="useCoupon('birthday')">사용</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final Summary -->
+                <div class="payment-summary">
+                    <div class="summary-row">
+                        <span>상품 금액</span>
+                        <span id="payment-subtotal">₩0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>멤버십 할인</span>
+                        <span id="payment-discount">-₩0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>쿠폰 할인</span>
+                        <span id="coupon-discount">₩0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>배달비</span>
+                        <span id="delivery-fee">무료</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>최종 결제 금액</span>
+                        <span id="final-total">₩0</span>
+                    </div>
+                </div>
+
+                <button class="btn-primary full-width" onclick="processPayment()">
+                    <i class="fas fa-credit-card"></i>
+                    결제하기
+                </button>
+            </div>
+        </div>
+
+        <!-- Order Status Screen -->
+        <div id="order-status-screen" class="screen hidden">
+            <div class="screen-header">
+                <h2>주문 현황</h2>
+                <button class="close-btn" onclick="goToMenu()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="order-status-content">
+                <div class="order-success">
+                    <div class="success-icon">✅</div>
+                    <h3>주문이 완료되었습니다!</h3>
+                    <p>주문번호: <span id="order-number">#47</span></p>
+                </div>
+
+                <div class="status-timeline">
+                    <div class="status-step completed">
+                        <div class="step-icon">📝</div>
+                        <div class="step-info">
+                            <h4>주문 접수</h4>
+                            <span>13:15</span>
+                        </div>
+                    </div>
+                    <div class="status-step active">
+                        <div class="step-icon">👨‍🍳</div>
+                        <div class="step-info">
+                            <h4>조리 중</h4>
+                            <span>예상 10분</span>
+                        </div>
+                    </div>
+                    <div class="status-step">
+                        <div class="step-icon">🔔</div>
+                        <div class="step-info">
+                            <h4>준비 완료</h4>
+                            <span>13:30 예정</span>
+                        </div>
+                    </div>
+                    <div class="status-step">
+                        <div class="step-icon">✨</div>
+                        <div class="step-info">
+                            <h4>픽업 완료</h4>
+                            <span>-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-details">
+                    <h4>주문 상세</h4>
+                    <div class="order-items-summary" id="order-items-summary">
+                        <!-- 주문된 아이템들이 표시됩니다 -->
+                    </div>
+                </div>
+
+                <div class="estimated-time">
+                    <h4>⏰ 예상 픽업 시간</h4>
+                    <div class="pickup-time-display">
+                        <span class="time">13:30</span>
+                        <span class="message">조리가 완료되면 알림을 보내드릴게요!</span>
+                    </div>
+                </div>
+
+                <div class="support-message">
+                    <div class="message-box">
+                        <h4>💚 따뜻한 한 끼, 함께하는 마음</h4>
+                        <p>오늘 주문으로 어려운 학생 지원 기금에<br><strong>₩420</strong>이 적립되었습니다.</p>
+                        <small>여러분의 선택이 더 따뜻한 캠퍼스를 만들어갑니다 🙏</small>
+                    </div>
+                </div>
+
+                <div class="order-actions">
+                    <button class="btn-secondary" onclick="callStore()">
+                        <i class="fas fa-phone"></i>
+                        매장 전화
+                    </button>
+                    <button class="btn-primary" onclick="goToMenu()">
+                        <i class="fas fa-home"></i>
+                        메뉴로 돌아가기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

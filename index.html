@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>으능정이 우송 - 우송대 학생 전용 김밥 주문</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Splash Screen -->
+        <div id="splash-screen" class="splash-screen">
+            <div class="logo-container">
+                <div class="logo">🍱</div>
+                <h1>으능정이 우송</h1>
+                <p>우송대 학생들의 든든한 한 끼</p>
+            </div>
+            <div class="loading-spinner"></div>
+        </div>
+
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen hidden">
+            <div class="welcome-content">
+                <div class="brand-header">
+                    <div class="logo">🍱</div>
+                    <h1>으능정이 우송</h1>
+                    <p class="tagline">우송대 학생들과 함께하는<br>따뜻한 김밥 이야기</p>
+                </div>
+                
+                <div class="feature-highlights">
+                    <div class="feature-item">
+                        <i class="fas fa-clock"></i>
+                        <span>빠른 예약주문</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-percentage"></i>
+                        <span>학생 할인 혜택</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-heart"></i>
+                        <span>학생 지원 기금</span>
+                    </div>
+                </div>
+
+                <div class="language-selector">
+                    <button class="lang-btn active" data-lang="ko">한국어</button>
+                    <button class="lang-btn" data-lang="en">English</button>
+                    <button class="lang-btn" data-lang="zh">中文</button>
+                    <button class="lang-btn" data-lang="vi">Tiếng Việt</button>
+                </div>
+
+                <div class="auth-buttons">
+                    <button class="btn-primary" onclick="showLogin()">
+                        <i class="fas fa-sign-in-alt"></i>
+                        로그인
+                    </button>
+                    <button class="btn-secondary" onclick="showSignup()">
+                        <i class="fas fa-user-plus"></i>
+                        학생 멤버십 가입
+                    </button>
+                </div>
+
+                <p class="demo-notice">
+                    📱 이것은 데모 버전입니다<br>
+                    실제 서비스의 기능과 디자인을 미리 체험해보세요!
+                </p>
+            </div>
+        </div>
+
+        <!-- Login Screen -->
+        <div id="login-screen" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-btn" onclick="showWelcome()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>로그인</h2>
+            </div>
+
+            <div class="login-form">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" placeholder="학교 이메일" id="email">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" placeholder="비밀번호" id="password">
+                </div>
+                
+                <button class="btn-primary full-width" onclick="login()">
+                    로그인
+                </button>
+
+                <div class="divider">또는</div>
+
+                <button class="btn-kakao full-width">
+                    <i class="fas fa-comment"></i>
+                    카카오톡으로 계속하기
+                </button>
+
+                <p class="login-footer">
+                    회원이 아니신가요? 
+                    <a href="#" onclick="showSignup()">학생 멤버십 가입하기</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Signup Screen -->
+        <div id="signup-screen" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-btn" onclick="showWelcome()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>멤버십 가입</h2>
+            </div>
+
+            <div class="signup-form">
+                <div class="form-section">
+                    <h3>🎓 학생 정보</h3>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" placeholder="이름" id="name">
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" placeholder="전화번호" id="phone">
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-graduation-cap"></i>
+                        <select id="department">
+                            <option value="">학과 선택</option>
+                            <option value="computer">컴퓨터정보학과</option>
+                            <option value="business">경영학과</option>
+                            <option value="english">영어학과</option>
+                            <option value="design">디자인학과</option>
+                            <option value="nursing">간호학과</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" placeholder="학번" id="student-id">
+                    </div>
+                    <div class="grade-selector">
+                        <span>학년:</span>
+                        <div class="grade-buttons">
+                            <button class="grade-btn" data-grade="1">1학년</button>
+                            <button class="grade-btn" data-grade="2">2학년</button>
+                            <button class="grade-btn" data-grade="3">3학년</button>
+                            <button class="grade-btn" data-grade="4">4학년</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🌍 언어 및 알레르기</h3>
+                    <div class="input-group">
+                        <i class="fas fa-globe"></i>
+                        <select id="nationality">
+                            <option value="KOR">한국</option>
+                            <option value="CHN">중국</option>
+                            <option value="VNM">베트남</option>
+                            <option value="USA">미국</option>
+                            <option value="OTHER">기타</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <input type="text" placeholder="알레르기 정보 (선택사항)" id="allergy">
+                    </div>
+                </div>
+
+                <div class="membership-benefits">
+                    <h3>💚 멤버십 혜택</h3>
+                    <ul>
+                        <li>🎯 첫 주문 20% 할인</li>
+                        <li>🎂 생일 특별 쿠폰</li>
+                        <li>📚 시험기간 무료 배달</li>
+                        <li>💰 적립 포인트 5%</li>
+                    </ul>
+                </div>
+
+                <div class="terms-agreement">
+                    <label>
+                        <input type="checkbox" id="agree-terms">
+                        <span class="checkmark"></span>
+                        이용약관 및 개인정보 처리방침에 동의합니다
+                    </label>
+                </div>
+
+                <button class="btn-primary full-width" onclick="signup()">
+                    멤버십 가입하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
