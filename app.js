@@ -649,7 +649,6 @@ async function processPayment() {
         alert('결제 처리 중 오류가 발생했습니다: ' + error.message);
     }
 }
-}
 
 // 주문 상태 화면 표시
 function showOrderStatus(orderId) {
